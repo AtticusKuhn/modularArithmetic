@@ -135,3 +135,8 @@ postulate
   -- mod-eq : ⟦ x + k ⟧ₖ ≡ ⟦ x ⟧ₖ
   _+ₖ_ :   Mod k → Mod k → Mod k
   -- _⟦+ₖ⟧ₖ_ : {k : ℕ} →  (x y : ℤ) → ⟦ x + y ⟧ₖ ≡ ⟦ x ⟧ₖ +ₖ ⟦ y ⟧ₖ
+  --
+  --
+
+data Mod2 : ℕ → ℕ → Set where
+  fromA : (a k n  : ℕ) → Mod2 (? Data.Nat.* n Data.Nat.+ k) n

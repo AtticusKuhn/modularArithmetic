@@ -23,21 +23,37 @@ test2 = refl
 
 
 
-record CyclicGroup ( n : ℤ ) : Set₁  where
+record CyclicGroup ( n : ℤ ) (ℤₙ : Set) : Set  where
   field
-    ℤₙ : Set
+    -- ℤₙ : Set
     ⟦_⟧ₙ : ℤ → ℤₙ
     _+ₙ_ : ℤₙ → ℤₙ → ℤₙ
     homomorphism :  (x y : ℤ) → ⟦ x ⟧ₙ +ₙ ⟦ y ⟧ₙ ≡ ⟦ x + y ⟧ₙ
     loop : ⟦ n ⟧ₙ ≡  ⟦ +0 ⟧ₙ
+open CyclicGroup public
 
-cyclic0 : CyclicGroup +0
+
+-- record CyclicGroupOf ( n : ℤ ) : Set₁  where
+  -- field
+    -- ℤₙ : Set
+    -- ⟦_⟧ₙ : ℤ → ℤₙ
+    -- _+ₙ_ : ℤₙ → ℤₙ → ℤₙ
+    -- homomorphism :  (x y : ℤ) → ⟦ x ⟧ₙ +ₙ ⟦ y ⟧ₙ ≡ ⟦ x + y ⟧ₙ
+    -- loop : ⟦ n ⟧ₙ ≡  ⟦ +0 ⟧ₙ
+cyclic0 : CyclicGroup +0 ℤ
 cyclic0 = record
-           { ℤₙ = ℤ
-           ; ⟦_⟧ₙ = id
+           { ⟦_⟧ₙ = id
            ; _+ₙ_ = _+_
            ; homomorphism = λ x y → refl
            ; loop = refl }
+
+
+mods : {t : Set} (n : ℕ) →  CyclicGroup +0 t → CyclicGroup (+ (ℕ.suc n)) t
+mods  n x = record
+             {  ⟦_⟧ₙ = λ y → ⟦ x ⟧ₙ (+ (y % +(ℕ.suc n)))
+             ; _+ₙ_ = λ a b → (x +ₙ a) b
+             ; homomorphism = λ a b → {!!}
+             ; loop = {!!} }
 
 -- (x % (1 + n)) + (y % (1 + n)) = (x + y) % (1 + n)
 open import Data.Nat.DivMod hiding (_%_)
@@ -56,10 +72,10 @@ postulate
 auxLoop : (n : ℕ) →  +[1+ n ] % +[1+ n ] ≡ +0 % +[1+ n ]
 auxLoop zero = refl
 auxLoop (ℕ.suc n) = modAux 1 n
-cyclicsuc : (n : ℕ) → CyclicGroup (+ (ℕ.suc n))
-cyclicsuc n =  record
-                { ℤₙ = ℕ
-                ; ⟦_⟧ₙ = λ x → x % (+ ℕ.suc n)
-                ; _+ₙ_ = λ a b → (a Data.Nat.+ b) Data.Nat.% (ℕ.suc n)  -- Data.Nat._+_
-                ; homomorphism = auxHomomorphism n
-                ; loop = auxLoop n }
+-- cyclicsuc : (n : ℕ) → CyclicGroup (+ (ℕ.suc n))
+-- cyclicsuc n =  record
+--                 { ℤₙ = ℕ
+--                 ; ⟦_⟧ₙ = λ x → x % (+ ℕ.suc n)
+--                 ; _+ₙ_ = λ a b → (a Data.Nat.+ b) Data.Nat.% (ℕ.suc n)  -- Data.Nat._+_
+--                 ; homomorphism = auxHomomorphism n
+--                 ; loop = auxLoop n }
