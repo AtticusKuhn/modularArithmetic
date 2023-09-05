@@ -1,6 +1,7 @@
 open import Data.Integer
 module sets ( k : ℤ ) where
 open import Data.Product
+open import Data.Sum
 open import Relation.Unary
 
 open import Relation.Binary.PropositionalEquality
@@ -15,6 +16,7 @@ variable
   a b c d e : ℤ
   A B : Set
   P Q : Pred A lzero
+  f : ℤ → ℤ
 
 
 
@@ -30,8 +32,9 @@ step≈’ {a} {b} {c} (step≈ x) rewrite (+-assoc a (x * k) (c * k)) | (sym (*
 refl≈’ : Reflexive _≈’_
 refl≈’ {a} = subst (λ x → a ≈’ x) (+-identityʳ a) (subst (λ x → a ≈’ a + x ) (*-zeroˡ k) (step≈ +0))
 
+
 cong≈ : (ℤ → ℤ) → Set
-cong≈ f = {a b : ℤ} →  a ≈’ b → f a ≈’ f b
+cong≈ f =  {a b : ℤ} →  a ≈’ b → f a ≈’ f b
 
 cong2≈ : (ℤ → ℤ → ℤ) → Set
 cong2≈ f = {a b c d : ℤ} →  a ≈’ b → c ≈’ d →  f a c ≈’ f b d
@@ -141,18 +144,18 @@ expk : ℕ → modk → modk
 expk n = onRep (_^ n)
 
 
-⟦onRep⟧aux : {f : ℤ → ℤ} → cong≈ f → {a : ℤ} → onRep f ⟦ a ⟧ ⊆′ ⟦ f a ⟧
+⟦onRep⟧aux : cong≈ f → {a : ℤ} → onRep f ⟦ a ⟧ ⊆′ ⟦ f a ⟧
 ⟦onRep⟧aux cong _ (_ , a=z , y=fz) = trans≈’ y=fz (cong a=z)
 
-⟦onRep⟧ : (f : ℤ → ℤ) → cong≈ f → (a  : ℤ) → ⟦ f a ⟧ ≐′ onRep f ⟦ a ⟧
-⟦onRep⟧ f cong a = (λ x x≈fa → a , refl≈’ , x≈fa) , ⟦onRep⟧aux cong
+⟦onRep⟧ : cong≈ f → (a  : ℤ) → ⟦ f a ⟧ ≐′ onRep f ⟦ a ⟧
+⟦onRep⟧ cong a = (λ x x≈fa → a , refl≈’ , x≈fa) , ⟦onRep⟧aux cong
 
 
 ⟦negatek⟧ : ∀ a → ⟦ - a ⟧ ≐′ negatek ⟦ a ⟧
-⟦negatek⟧ = ⟦onRep⟧ (-_) cong-
+⟦negatek⟧ = ⟦onRep⟧ cong-
 
 ⟦expk⟧ : (n : ℕ) →  ∀ a →  ⟦ a ^ n ⟧ ≐′ expk n ⟦ a ⟧
-⟦expk⟧ n = ⟦onRep⟧ (_^ n) (cong^ n)
+⟦expk⟧ n = ⟦onRep⟧ (cong^ n)
 
 onRep2 : (ℤ → ℤ → ℤ) → modk → modk → modk
 onRep2 _·_ a b x =  ∃ λ y → ∃ λ z → a y × b z × x ≈’ y · z
@@ -175,3 +178,22 @@ mulk = onRep2 _*_
 
 ⟦mulk⟧ : ∀ a b → ⟦ a * b ⟧ ≐′ mulk ⟦ a ⟧ ⟦ b ⟧
 ⟦mulk⟧ =  ⟦onRep2⟧ cong2*
+
+data Even  : ℕ →  Set where
+  2n : (n : ℕ) → Even (2 *ℕ n)
+
+data Odd  : ℕ →  Set where
+  2n+1 : (n : ℕ) → Odd (ℕ.suc (2 *ℕ n))
+
+even-or-odd : (n : ℕ) → (Even n) ⊎ (Odd n)
+even-or-odd zero = inj₁ (2n zero)
+even-or-odd (ℕ.suc zero) = inj₂ (2n+1 0)
+even-or-odd (ℕ.suc (ℕ.suc n)) with (even-or-odd n)
+... | (inj₁ (2n x)) = inj₁ (2n ({!!}))
+... | (inj₂ (2n+1 y)) = inj₂ (2n+1 {!!})
+
+fastExp : ℕ → ℤ → ℤ
+fastExp 0 x = 1ℤ
+fastExp (ℕ.suc n) x with (even-or-odd (n))
+... | (inj₁ (2n n/2)) = fastExp n/2 x
+... | (inj₂ (2n+1 n/2)) = {!!}
